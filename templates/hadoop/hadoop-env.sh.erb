@@ -1,0 +1,34 @@
+# Note: This file is managed by Puppet.
+
+<% if use_yarn == true -%>
+# Use YARN for all hadoop commands
+export HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+<% else -%>
+export HADOOP_MAPRED_HOME=/usr/lib/hadoop-0.20-mapreduce
+
+<% if @jobtracker_jmxremote_port -%>
+# Enable DateNode JMX connections on port <%= jobtracker_jmxremote_port %>
+HADOOP_JOBTRACKER_OPTS="-Dcom.sun.management.jmxremote.port=<%= jobtracker_jmxremote_port %> -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false $HADOOP_JOBTRACKER_OPTS"
+<% end -%>
+
+<% if @jobtracker_heap_size -%>
+HADOOP_JOBTRACKER_OPTS="-Xmx<%= jobtracker_heap_size %> $HADOOP_JOBTRACKER_OPTS"
+<% end -%>
+
+<% end # if use_yarn -%>
+
+<% if @namenode_jmxremote_port -%>
+# Enable NameNode JMX connections on port <%= namenode_jmxremote_port %>
+HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote.port=<%= namenode_jmxremote_port %> -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false $HADOOP_NAMENODE_OPTS"
+<% end -%>
+
+<% if @namenode_heap_size -%>
+HADOOP_NAMENODE_OPTS="-Xmx<%= namenode_heap_size %> $HADOOP_NAMENODE_OPTS"
+<% end -%>
+
+<% if @datanode_jmxremote_port -%>
+# Enable DateNode JMX connections on port <%= datanode_jmxremote_port %>
+HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote.port=<%= datanode_jmxremote_port %> -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false $HADOOP_DATANODE_OPTS"
+#<% else -%>
+#HADOOP_DATANODE_OPTS="-Xmx10g"
+<% end -%>

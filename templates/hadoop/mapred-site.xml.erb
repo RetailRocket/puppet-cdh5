@@ -1,0 +1,402 @@
+<%
+# Convert a namenode hostname to a NameNode ID.
+# We can't use '.' characters because NameNode IDs.
+# will be used in the names of some Java properties, 
+# which are '.' delimited.
+def namenode_host_to_id(host)
+  host.tr('.', '-')
+end
+
+-%>
+<?xml version="1.0"?>
+<!-- NOTE:  This file is managed by Puppet. -->
+
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+<configuration>
+  <property>
+    <name>hadoop.skip.worker.version.check</name>
+    <value>true</value>
+  </property>
+
+<% if @datanode_mounts -%>
+  <property>
+   <name>mapred.local.dir</name>
+   <value><%= datanode_mounts.sort.collect { |mount| mount + "/" + mapred_data_path }.join(',') %></value>
+  </property>
+<% end -%>
+<% if @ha_jobtracker -%>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value><%= @nameservice_id %>:8021</value>
+  </property>
+  <property>
+    <name>mapred.jobtrackers.<%= @nameservice_id %></name>
+    <value><%= @namenode_hosts.sort.collect { |host| namenode_host_to_id(host) }.join(',') %></value>
+  </property>
+
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>mapred.jobtracker.rpc-address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <value><%= host %>:8021</value>
+  </property>
+<% end -%>
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>mapred.job.tracker.http.address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <!-- HTTP bind address for jt1 -->
+    <value>0.0.0.0:50030</value>
+  </property>
+<% end -%>
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>mapred.ha.jobtracker.rpc-address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <!-- RPC address for jt1 HA daemon -->
+    <value><%= host %>:8023</value>
+  </property>
+<% end -%>
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>mapred.ha.jobtracker.http-redirect-address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <!-- HTTP redirect address for jt1 -->
+    <value><%= host %>.cloudapp.net:50030</value>
+  </property>
+<% end -%>
+  <property>
+    <name>mapred.jobtracker.restart.recover</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker.persist.jobstatus.active</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker.persist.jobstatus.hours</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>mapred.job.tracker.persist.jobstatus.dir</name>
+    <value>/jobtracker/jobsInfo</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.proxy.provider.logicaljt</name>
+    <value>org.apache.hadoop.mapred.ConfiguredFailoverProxyProvider</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.max.attempts</name>
+    <value>15</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.sleep.base.millis</name>
+    <value>500</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.sleep.max.millis</name>
+    <value>1500</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.connection.retries</name>
+    <value>0</value>
+  </property>
+  <property>
+    <name>mapred.client.failover.connection.retries.on.timeouts</name>
+    <value>0</value>
+  </property>
+  <property>
+    <name>mapred.ha.fencing.methods</name>
+    <value>shell(/bin/true)</value>
+  </property>
+
+<% else -%>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value><%= @primary_namenode_host %>:8021</value>
+  </property>
+<% end -%>
+<% #end of ha_jobtracker -%>
+
+<% if @use_yarn -%>
+  <property>
+   <name>mapreduce.framework.name</name>
+   <value>yarn</value>
+  </property>
+
+  <property>
+   <name>mapreduce.jobhistory.address</name>
+   <value><%= @primary_namenode_host %>:10020</value>
+  </property>
+
+  <property>
+   <name>mapreduce.jobhistory.webapp.address</name>
+   <value>0.0.0.0:19888</value>
+  </property>
+
+  <property>
+    <name>mapreduce.jobhistory.intermediate-done-dir</name>
+    <value>/user/history/done_intermediate</value>
+  </property>
+
+  <property>
+    <name>mapreduce.jobhistory.done-dir</name>
+    <value>/user/history/done</value>
+  </property>
+
+  <property>
+    <name>mapred.job.tracker</name>
+     <!-- Hue gets confused if mapred.job.tracker is not set,
+       even though we are using YARN and the jobtracker is not running. -->
+    <value>localhost:8021</value>
+  </property>
+<% else -%>
+
+  <property>
+    <name>mapred.job.tracker.retiredjobs.cache.size</name>
+    <value>10</value>
+  </property>
+  <property>
+    <name>keep.failed.task.files</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>jobtracker.thrift.address</name>
+    <value>0.0.0.0:9290</value>
+  </property>
+  <property>
+    <name>mapred.jobtracker.plugins</name>
+    <value>org.apache.hadoop.thriftfs.ThriftJobTrackerPlugin</value>
+    <description>Comma-separated list of jobtracker plug-ins to be activated.</description>
+  </property>
+  <property>
+    <name>mapred.jobtracker.taskScheduler</name>
+    <value>org.apache.hadoop.mapred.FairScheduler</value>
+    <description>The class responsible for scheduling the tasks.</description>
+  </property>
+<% if @mapreduce_system_dir -%>
+
+  <property>
+    <name>mapred.system.dir</name>
+    <value><%= @mapreduce_system_dir %></value>
+  </property>
+<% end -%>
+<% end -%>
+
+<% if @mapreduce_map_tasks_maximum -%>
+  <property>
+   <name>mapreduce.tasktracker.map.tasks.maximum</name>
+   <value><%= mapreduce_map_tasks_maximum %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_reduce_tasks_maximum -%>
+  <property>
+   <name>mapreduce.tasktracker.reduce.tasks.maximum</name>
+   <value><%= mapreduce_reduce_tasks_maximum %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_job_reuse_jvm_num_tasks -%>
+  <property>
+    <name>mapreduce.job.reuse.jvm.num.tasks</name>
+    <value><%= mapreduce_job_reuse_jvm_num_tasks %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_reduce_shuffle_parallelcopies -%>
+  <property>
+    <name>mapreduce.reduce.parallel.copies</name>
+    <value><%= mapreduce_reduce_shuffle_parallelcopies %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_map_memory_mb -%>
+  <property>
+   <name>mapreduce.map.memory.mb</name>
+   <value><%= mapreduce_map_memory_mb %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_reduce_memory_mb -%>
+  <property>
+   <name>mapreduce.reduce.memory.mb</name>
+   <value><%= mapreduce_reduce_memory_mb %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_task_io_sort_mb -%>
+  <property>
+    <name>mapreduce.task.io.sort.mb</name>
+    <value><%= mapreduce_task_io_sort_mb %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_task_io_sort_factor -%>
+  <property>
+    <name>mapreduce.task.io.sort.factor</name>
+    <value><%= mapreduce_task_io_sort_factor %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_map_java_opts -%>
+  <property>
+    <name>mapreduce.map.java.opts</name>
+    <value><%= mapreduce_map_java_opts %></value>
+  </property>
+<% end -%>
+
+<% if @mapreduce_reduce_java_opts -%>
+  <property>
+    <name>mapreduce.reduce.java.opts</name>
+    <value><%= mapreduce_reduce_java_opts %></value>
+  </property>
+<% end -%>
+
+  <!-- MapReduce intermediate compression -->
+  <property>
+    <name>mapreduce.map.output.compress</name>
+    <value><%= mapreduce_intermediate_compression %></value>
+  </property>
+  <property>
+    <name>mapreduce.map.output.compress.codec</name>
+    <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+  </property>
+
+  <!-- MapReduce final output compression -->
+  <property>
+    <name>mapreduce.output.fileoutputformat.compress</name>
+    <value><%= mapreduce_final_compression %></value>
+  </property>
+  <property>
+    <name>mapred.output.fileoutputformat.compress.codec</name>
+    <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+  </property>
+  <property>
+    <name>mapreduce.output.fileoutputformat.compress.type</name>
+    <value>BLOCK</value>
+  </property>
+
+  <property>
+    <name>mapred.hosts.exclude</name>
+    <value><%= config_directory %>/hosts.exclude</value>
+    <description>
+      A file that contains a list of mapreduce hosts to exclude.
+      This is useful for decommissioning nodes.
+    </description>
+  </property>
+
+  <!-- my insert -->
+
+  <property>
+    <name>mapred.job.tracker.http.address</name>
+    <value><%= mapred_job_tracker_http_address %>:50030</value>
+  </property>
+  
+  <property>
+    <name>mapreduce.job.counters.max</name>
+    <value><%= mapreduce_job_counters_max %></value>
+  </property>
+
+  <property>
+    <name>mapred.output.compress</name>
+    <value><%= mapred_output_compress %></value>
+  </property>
+
+  <property>
+    <name>mapred.output.compression.type</name>
+    <value><%= mapred_output_compression_type %></value>
+  </property>
+  <% if @mapred_output_compression_codec %> 
+  <property>
+    <name>mapred.output.compression.codec</name>
+    <value><%= mapred_output_compression_codec %></value>
+  </property>
+  <% end -%>
+
+  <% if @mapred_map_output_compression_codec -%>
+  <property>
+    <name>mapred.map.output.compression.codec</name>
+    <value><%= mapred_map_output_compression_codec %></value>
+  </property>
+  <% end -%>
+
+  <property>
+    <name>mapred.child.env</name>
+    <value>JAVA_LIBRARY_PATH=$JAVA_LIBRARY_PATH:/usr/lib/hadoop/lib/native</value>
+  </property>
+
+  <property>
+    <name>mapred.compress.map.output</name>
+    <value><%= mapred_compress_map_output %></value>
+  </property> 
+
+  <property>
+    <name>zlib.compress.level</name>
+    <value><%= zlib_compress_level %></value>
+  </property>
+  <property>
+    <name>io.sort.factor</name>
+    <value><%= io_sort_factor %></value>
+  </property>
+  <property>
+    <name>io.sort.record.percent</name>
+    <value><%= io_sort_record_percent %></value>
+  </property>
+  <property>
+    <name>io.sort.spill.percent</name>
+    <value><%= io_sort_spill_percent %></value>
+  </property>
+  <property>
+    <name>mapred.reduce.parallel.copies</name>
+    <value><%= mapred_reduce_parallel_copies %></value>
+  </property>
+  <property>
+    <name>mapred.submit.replication</name>
+    <value><%= mapred_submit_replication %></value>
+  </property>
+  <property>
+    <name>mapred.reduce.tasks</name>
+    <value><%= mapred_reduce_tasks %></value>
+  </property>
+  <property>
+    <name>mapred.userlog.retain.hours</name>
+    <value><%= mapred_userlog_retain_hours %></value>
+  </property>
+  <property>
+    <name>io.sort.mb</name>
+    <value><%= io_sort_mb %></value>
+  </property>
+<!--  <property>
+    <name>mapred.child.java.opts</name>
+    <value><%= mapred_child_java_opts %></value>
+  </property>
+-->
+  <property>
+    <name>mapred.job.reuse.jvm.num.tasks</name>
+    <value><%= mapred_job_reuse_jvm_num_tasks %></value>
+  </property>
+  <property>
+    <name>mapred.map.tasks.speculative.execution</name>
+    <value><%= mapred_map_tasks_speculative_execution %></value>
+  </property>
+  <property>
+    <name>mapred.reduce.tasks.speculative.execution</name>
+    <value><%= mapred_reduce_tasks_speculative_execution %></value>
+  </property>
+  <property>
+    <name>mapred.reduce.slowstart.completed.maps</name>
+    <value><%= mapred_reduce_slowstart_completed_maps %></value>
+  </property>
+  <property>
+    <name>mapred.tasktracker.map.tasks.maximum</name>
+    <value><%= mapred_tasktracker_map_tasks_maximum %></value>
+  </property>  
+  <property>
+    <name>mapred.tasktracker.reduce.tasks.maximum</name>
+    <value><%= mapred_tasktracker_reduce_tasks_maximum %></value>
+  </property>
+  <property>
+    <name>yarn.app.mapreduce.am.job.client.port-range</name>
+    <value>50000-50100</value>
+  </property>
+
+</configuration>

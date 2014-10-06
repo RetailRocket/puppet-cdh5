@@ -1,0 +1,5 @@
+# Note: This file is managed by Puppet.
+
+<% if @hive_heap_size_mb -%>
+HADOOP_HEAPSIZE="<%= hive_heap_size_mb %>"
+<% end -%>

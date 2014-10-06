@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!-- NOTE:  This file is managed by Puppet. -->
+
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+  <property>
+    <name><%= @use_yarn ? 'fs.defaultFS' : 'fs.default.name' %></name>
+    <value>hdfs://<%= @ha_enabled ? @nameservice_id : @primary_namenode_host %>:8020/</value>
+  </property>
+
+  <% if @fs_trash_interval -%>
+  <property>
+    <name>fs.trash.interval</name>
+    <value><%= fs_trash_interval %></value>
+  </property>
+  <% end -%>
+
+  <% if @io_compression_codecs -%>
+  <property>
+    <name>io.compression.codecs</name>
+    <value><%= io_compression_codecs.join(',') %></value>
+  </property>
+  <% end -%>
+
+  <property>
+    <name>io.compression.codec.lzo.class</name>
+    <value>com.hadoop.compression.lzo.LzoCodec</value>
+  </property>
+  
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value><%= hadoop_security_authentication %></value>
+  </property>
+
+  <property>
+    <name>hadoop.rpc.protection</name>
+    <value><%= hadoop_rpc_protection %></value>
+  </property>
+
+  <property>
+    <name>hadoop.security.auth_to_local</name>
+    <value><%= hadoop_security_auth_to_local %></value>
+  </property>
+<% if @io_file_buffer_size -%>
+  <property>
+    <name>io.file.buffer.size</name>
+    <value><%= io_file_buffer_size %></value>
+  </property>
+<% end -%>
+
+<% if enable_webhdfs -%>
+<% # NOTE: There might be a better way to
+   # conditionally set this rather than relying
+   # the enable_webhdfs setting.  This will do for now.
+-%>
+  <!-- Hue WebHDFS proxy user -->
+  <property>
+    <name>hadoop.proxyuser.hue.hosts</name>
+    <value><%= hadoop_proxyuser_hue_hosts %></value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.hue.groups</name>
+    <value><%= hadoop_proxyuser_hue_groups %></value>
+  </property>
+
+  <!-- Oozie WebHDFS proxy user -->
+  <property>
+    <name>hadoop.proxyuser.oozie.hosts</name>
+    <value><%= hadoop_proxyuser_oozie_hosts %></value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.oozie.groups</name>
+    <value><%= hadoop_proxyuser_oozie_groups %></value>
+  </property>
+<% end -%>
+
+<% if @net_topology_script_template -%>
+  <!-- Script used to map nodes to rack or rows in datacenter. -->
+  <property>
+      <name>net.topology.script.file.name</name>
+      <value><%= @net_topology_script_path %></value>
+  </property>
+<% end -%>
+  <property>
+    <name>hadoop.proxyuser.httpfs.hosts</name>
+    <value>localhost,rrockettest,<%= @primary_namenode_host %></value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.httpfs.groups</name>
+    <value>httpfs,hdfs,necromant,hadoop</value>
+  </property>
+
+  
+  <property>
+    <name>hadoop.tmp.dir</name>
+    <value><%= hadoop_tmp_dir %></value>
+  </property>
+
+  <property>
+    <name>hadoop.http.staticuser.user</name>
+    <value>tik</value>
+  </property>
+
+</configuration>
