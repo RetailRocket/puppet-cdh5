@@ -1,11 +1,7 @@
 # Description
 
 Puppet module to install and manage components of
-Cloudera's Distribution 4 (CDH4) for Apache Hadoop.
-
-NOTE: The main puppet-cdh4 repository is hosted in WMF Gerrit at
-[operations/puppet/cdh4](https://gerrit.wikimedia.org/r/#/admin/projects/operations/puppet/cdh4).
-
+Cloudera's Distribution 5 (CDH5) for Apache Hadoop.
 
 Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie and
 Hue.  Note that, in order for this module to work, you will have to ensure
@@ -21,23 +17,16 @@ that:
 config files.  This prevents accidental deployments of config changes.  If you
 make config changes in puppet, you must apply puppet and then manually restart
 the relevant services.
-- This module has only been tested using CDH 4.2.1 on Ubuntu Precise 12.04.2 LTS
+- This module has only been tested using CDH 5.1.2 on Debian 7.6 wheezy
 - Many of the above mentioned services are not yet implemented in v0.2.
   See the v0.1 branch if you'd like to use these now.
 
 
 # Installation
 
-Clone (or copy) this repository into your puppet modules/cdh4 directory:
+Clone (or copy) this repository into your puppet modules/cdh5 directory:
 ```bash
-git clone git://github.com/wikimedia/puppet-cdh4.git modules/cdh4
-```
-
-Or you could also use a git submodule:
-```bash
-git submodule add git://github.com/wikimedia/puppet-cdh4.git modules/cdh4
-git commit -m 'Adding modules/cdh4 as a git submodule.'
-git submodule init && git submodule update
+git clone https://github.com/RetailRocket/puppet-cdh5 modules/cdh5
 ```
 
 # Hadoop
@@ -111,7 +100,7 @@ TaskTracker.
 ## High Availability NameNode
 
 For detailed documentation, see the
-[CDH4 High Availability Guide](http://www.cloudera.com/content/cloudera-content/cloudera-docs/CDH4/4.2.1/CDH4-High-Availability-Guide/CDH4-High-Availability-Guide.html).
+[CDH5 High Availability Guide](http://www.cloudera.com/content/cloudera/en/documentation/cdh5/v5-0-0/CDH5-High-Availability-Guide/CDH5-High-Availability-Guide.html).
 
 This puppet module only supports Quorum-based HA storage using JournalNodes.
 It does not support NFS based HA.
@@ -327,7 +316,7 @@ class { 'cdh5::hue':
 There are many more parameters to the ```cdh5::hue``` class.  See the class
 documentation in manifests/hue.pp.
 
-Note that while much of this puppet-cdh4 module supports MRv1, this Hue
+Note that while much of this puppet-cdh5 module supports MRv1, this Hue
 puppetization currently does not.  (Feel free to submit a patch to add
 MRv1 support though!)
 
