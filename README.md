@@ -3,8 +3,8 @@
 Puppet module to install and manage components of
 Cloudera's Distribution 5 (CDH5) for Apache Hadoop.
 
-Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie and
-Hue.  Note that, in order for this module to work, you will have to ensure
+Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie, Hue, Flume-ng and Mahaut.
+Note that, in order for this module to work, you will have to ensure
 that:
 
 - Oracle Java version 7 or greater is installed
@@ -327,3 +327,28 @@ Hue will be configured to run its Hive and Oozie apps.
 Hue Impala is not currently supported, since Impala hasn't been puppetized
 in this module yet.
 
+
+#Flume-ng
+
+To install flume-ng:
+
+```puppet
+class { 'cdh5::flume-ng':
+      flume_user           => 'unix_user',
+      flume_agent          => 'agent',
+      flume_jmxremote_port => $flume_jmxremote_port,
+}
+```
+
+ - flume_jmxremote_port is a required variable
+ - flume_user default is root
+ - flume_agent default is agent
+
+
+ #Mahaut
+
+ To install mahaut:
+
+ ```puppet
+ class{ 'cdh5::mahaut'}
+ ```
