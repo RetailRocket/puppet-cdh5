@@ -131,7 +131,7 @@ class my::hadoop {
         nameservice_id      => 'mycluster',
         namenode_hosts      => [
             'namenode1.domain.org',
-            'namenode2.domain.org
+            'namenode2.domain.org'
         ],
         journalnode_hosts   => [
             'datanode1.domain.org',
