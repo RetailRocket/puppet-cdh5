@@ -3,7 +3,7 @@
 Puppet module to install and manage components of
 Cloudera's Distribution 5 (CDH5) for Apache Hadoop.
 
-Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie, Hue, Flume-ng and Mahaut.
+Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie, Hue, Flume-ng and Mahout.
 Note that, in order for this module to work, you will have to ensure
 that:
 
