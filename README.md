@@ -56,7 +56,7 @@ node 'hadoop-client.domain.org' {
 }
 ```
 
-This will ensure that CDH4 client packages are installed, and that
+This will ensure that CDH5 client packages are installed, and that
 Hadoop related config files are in place with proper settings.
 
 The datanode_mounts parameter assumes that you want to keep your
