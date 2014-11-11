@@ -7,9 +7,9 @@ Installs HDFS, YARN or MR1, Hive, HBase, Pig, Sqoop, Zookeeper, Oozie and
 Hue.  Note that, in order for this module to work, you will have to ensure
 that:
 
-- Sun JRE version 6 or greater is installed
+- Oracle Java version 7 or greater is installed
 - Your package manager is configured with a repository containing the
-  Cloudera 4 packages.
+  Cloudera 5 packages.
 
 **Notes:**
 
@@ -20,6 +20,7 @@ the relevant services.
 - This module has only been tested using CDH 5.1.2 on Debian 7.6 wheezy
 - Many of the above mentioned services are not yet implemented in v0.2.
   See the v0.1 branch if you'd like to use these now.
+- This module is a fork of the module [puppet-cdh4](https://github.com/wikimedia/puppet-cdh).
 
 
 # Installation
