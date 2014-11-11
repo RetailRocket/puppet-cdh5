@@ -345,10 +345,10 @@ class { 'cdh5::flume-ng':
  - flume_agent default is agent
 
 
-#Mahaut
+#Mahout
 
-To install mahaut:
+To install mahout:
 
 ```puppet
-class{ 'cdh5::mahaut'}
+class{ 'cdh5::mahout'}
 ```
